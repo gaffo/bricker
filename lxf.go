@@ -40,7 +40,6 @@ func ParsePartsMap(file string) (*PartMap, error) {
 		blid := parts[2]
 		m.ldd2bl[lddid] = blid
 		m.bl2ldd[blid] = lddid
-		fmt.Printf("%s->%s\n", lddid, blid)
 	}
 
 	return &m, nil
@@ -92,6 +91,27 @@ type LXFML struct {
 	Bricks []LXFBrick `xml:"Bricks>Brick"`
 }
 
+func defaultOrIncrementQuantity(parts []BLPart, part, color string) []BLPart {
+	for i, p := range parts {
+		if p.ItemID != part {
+			continue
+		}
+		if p.Color != color {
+			continue
+		}
+		parts[i].Quantity += 1
+		return parts
+	}
+	parts = append(
+		parts,
+		BLPart{
+			ItemID:   part,
+			Color:    color,
+			Quantity: 1,
+		})
+	return parts
+}
+
 func (self *LXFML) ConvertWithSources(colors *ColorMap, parts *PartMap) []BLPart {
 	bl := make([]BLPart, 0, 1024)
 
@@ -103,11 +123,10 @@ func (self *LXFML) ConvertWithSources(colors *ColorMap, parts *PartMap) []BLPart
 		design := part.DesignID
 		materials := part.Materials
 		materials = strings.Split(materials, ",")[0]
-		bl = append(bl, BLPart{
-			ItemID:   parts.LDD2BL(design),
-			Color:    colors.LDD2BL(materials),
-			Quantity: 1,
-		})
+
+		blpart := parts.LDD2BL(design)
+		blcolor := colors.LDD2BL(materials)
+		bl = defaultOrIncrementQuantity(bl, blpart, blcolor)
 	}
 
 	return bl

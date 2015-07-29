@@ -61,3 +61,46 @@ func Test_ConvertSimple(t *testing.T) {
 		},
 		blParts[2])
 }
+
+func Test_ConvertHarder(t *testing.T) {
+	parser := bricker.LFXParser{}
+	lxfml, err := parser.Parse("harder.lxf")
+	assert.NoError(t, err)
+
+	colorMap, err := bricker.ParseColorMap("ldd_bl_colors.csv")
+	assert.NoError(t, err)
+	partsMap, err := bricker.ParsePartsMap("ldd_bl_parts.csv")
+	assert.NoError(t, err)
+
+	blParts := lxfml.ConvertWithSources(colorMap, partsMap)
+
+	assert.Equal(t, 4, len(blParts))
+	assert.Equal(t,
+		bricker.BLPart{
+			ItemID:   "99475",
+			Color:    "110",
+			Quantity: 1,
+		},
+		blParts[0])
+	assert.Equal(t,
+		bricker.BLPart{
+			ItemID:   "99495",
+			Color:    "11",
+			Quantity: 2,
+		},
+		blParts[1])
+	assert.Equal(t,
+		bricker.BLPart{
+			ItemID:   "99476",
+			Color:    "5",
+			Quantity: 1,
+		},
+		blParts[2])
+	assert.Equal(t,
+		bricker.BLPart{
+			ItemID:   "99476",
+			Color:    "110",
+			Quantity: 1,
+		},
+		blParts[3])
+}
